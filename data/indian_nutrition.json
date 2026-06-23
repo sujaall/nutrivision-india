@@ -1,0 +1,17 @@
+{
+  "poha": {"calories_per_100g": 130, "protein": 3, "carbs": 28, "fat": 1, "health_score": 8, "notes": "Light, easy to digest. Great breakfast."},
+  "biryani": {"calories_per_100g": 200, "protein": 8, "carbs": 28, "fat": 6, "health_score": 6, "notes": "High carb. Good post-workout meal."},
+  "dosa": {"calories_per_100g": 168, "protein": 4, "carbs": 30, "fat": 4, "health_score": 7, "notes": "Fermented — great for gut health."},
+  "idli": {"calories_per_100g": 90, "protein": 3, "carbs": 18, "fat": 0.5, "health_score": 9, "notes": "Low calorie, high protein ratio."},
+  "samosa": {"calories_per_100g": 310, "protein": 5, "carbs": 35, "fat": 17, "health_score": 3, "notes": "Deep fried. Enjoy occasionally."},
+  "dal": {"calories_per_100g": 116, "protein": 8, "carbs": 20, "fat": 0.4, "health_score": 9, "notes": "Excellent plant protein source."},
+  "roti": {"calories_per_100g": 297, "protein": 8, "carbs": 60, "fat": 3, "health_score": 7, "notes": "Complex carbs. Better than rice for fat loss."},
+  "paneer_butter_masala": {"calories_per_100g": 230, "protein": 10, "carbs": 12, "fat": 16, "health_score": 5, "notes": "High fat. Good protein for muscle building."},
+  "chole": {"calories_per_100g": 164, "protein": 9, "carbs": 27, "fat": 3, "health_score": 8, "notes": "High fiber and protein. Excellent for fitness."},
+  "naan": {"calories_per_100g": 310, "protein": 9, "carbs": 56, "fat": 5, "health_score": 5, "notes": "Refined flour. Limit for fat loss goals."},
+  "khichdi": {"calories_per_100g": 120, "protein": 5, "carbs": 22, "fat": 2, "health_score": 9, "notes": "Complete meal. Perfect for recovery days."},
+  "pav_bhaji": {"calories_per_100g": 175, "protein": 4, "carbs": 28, "fat": 6, "health_score": 5, "notes": "Tasty but high butter content."},
+  "upma": {"calories_per_100g": 145, "protein": 3, "carbs": 26, "fat": 4, "health_score": 7, "notes": "Light breakfast option."},
+  "gulab_jamun": {"calories_per_100g": 380, "protein": 5, "carbs": 58, "fat": 14, "health_score": 2, "notes": "Very high sugar. Treat only."},
+  "jalebi": {"calories_per_100g": 360, "protein": 2, "carbs": 65, "fat": 10, "health_score": 1, "notes": "Pure sugar. Avoid if cutting."}
+}

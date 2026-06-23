@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriVision India</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',sans-serif; background:#0a0f1e; color:#e2e8f0; min-height:100vh; }
+
+.header {
+  text-align:center; padding:36px 20px 20px;
+  background:linear-gradient(180deg,#0d1117,#0a0f1e);
+  border-bottom:1px solid #1e293b;
+}
+.header h1 {
+  font-size:2.2rem; font-weight:800;
+  background:linear-gradient(135deg,#f97316,#fbbf24);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.header p { color:#64748b; margin-top:8px; font-size:1rem; }
+
+.container { max-width:800px; margin:0 auto; padding:28px 16px; }
+
+.upload-zone {
+  border:2px dashed #334155; border-radius:20px;
+  padding:50px 20px; text-align:center; cursor:pointer;
+  transition:all 0.3s; background:#111827;
+}
+.upload-zone:hover { border-color:#f97316; background:#131f2e; }
+.upload-zone.drag-over { border-color:#f97316; background:#131f2e; }
+.upload-icon { font-size:3.5rem; margin-bottom:14px; }
+.upload-zone h2 { font-size:1.3rem; color:#cbd5e1; }
+.upload-zone p { color:#475569; margin-top:6px; font-size:0.9rem; }
+
+.btn {
+  background:linear-gradient(135deg,#f97316,#ef4444);
+  color:white; border:none; padding:13px 30px;
+  border-radius:50px; font-size:0.95rem; font-weight:700;
+  cursor:pointer; margin-top:18px; transition:transform 0.2s;
+  display:inline-block;
+}
+.btn:hover { transform:scale(1.04); }
+#fileInput { display:none; }
+
+.preview { margin:24px 0; text-align:center; display:none; }
+.preview img {
+  max-width:100%; max-height:280px; border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.preview-actions { margin-top:14px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+.loading { text-align:center; padding:40px; display:none; }
+.spinner {
+  width:48px; height:48px; border:4px solid #1e293b;
+  border-top:4px solid #f97316; border-radius:50%;
+  animation:spin 0.9s linear infinite; margin:0 auto 16px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading p { color:#94a3b8; }
+
+.results { display:none; }
+
+.food-name-card {
+  background:#111827; border-radius:20px; padding:24px;
+  margin-bottom:16px; border:1px solid #1e293b;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+}
+.food-name { font-size:1.9rem; font-weight:800; color:#fbbf24; text-transform:capitalize; }
+.confidence-badge {
+  background:#1e293b; border-radius:50px; padding:6px 16px;
+  font-size:0.85rem; color:#94a3b8;
+}
+.confidence-badge span { color:#f97316; font-weight:700; }
+
+.score-badge {
+  padding:6px 16px; border-radius:50px; font-weight:700; font-size:0.85rem;
+}
+.score-high { background:#14532d; color:#86efac; }
+.score-mid  { background:#713f12; color:#fde68a; }
+.score-low  { background:#7f1d1d; color:#fca5a5; }
+
+.macros-grid {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:12px; margin-bottom:16px;
+}
+.macro-card {
+  background:#111827; border-radius:14px; padding:18px 10px;
+  text-align:center; border:1px solid #1e293b;
+}
+.macro-value { font-size:1.6rem; font-weight:800; }
+.macro-label { font-size:0.75rem; color:#64748b; margin-top:4px; text-transform:uppercase; letter-spacing:0.05em; }
+.cal .macro-value { color:#f97316; }
+.pro .macro-value { color:#3b82f6; }
+.car .macro-value { color:#a855f7; }
+.fat .macro-value { color:#eab308; }
+
+.portion-section {
+  background:#111827; border-radius:14px; padding:18px 20px;
+  margin-bottom:16px; border:1px solid #1e293b;
+}
+.portion-label { color:#94a3b8; font-size:0.85rem; margin-bottom:10px; }
+.portion-label span { color:#f97316; font-weight:700; font-size:1rem; }
+input[type=range] { width:100%; accent-color:#f97316; cursor:pointer; }
+
+.feedback-section {
+  background:#111827; border-radius:14px; padding:18px 20px;
+  margin-bottom:16px; border:1px solid #1e293b;
+}
+.section-title {
+  font-size:0.72rem; color:#64748b; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;
+}
+.feedback-item {
+  background:#0f172a; border-radius:10px; padding:11px 14px;
+  margin-bottom:8px; font-size:0.9rem; border-left:3px solid #f97316;
+  line-height:1.5;
+}
+
+.alt-section {
+  background:#111827; border-radius:14px; padding:18px 20px;
+  margin-bottom:16px; border:1px solid #1e293b;
+}
+.alt-item {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 0; border-bottom:1px solid #1e293b; font-size:0.9rem;
+}
+.alt-item:last-child { border-bottom:none; }
+.alt-food { text-transform:capitalize; color:#cbd5e1; }
+.alt-conf { color:#64748b; font-size:0.85rem; }
+
+.reset-btn { text-align:center; margin-top:20px; }
+
+@media(max-width:500px) {
+  .macros-grid { grid-template-columns:repeat(2,1fr); }
+  .food-name { font-size:1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🍛 NutriVision India</h1>
+  <p>AI-powered nutrition analysis for Indian foods</p>
+</div>
+
+<div class="container">
+
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="uploadZone">
+    <div class="upload-icon">📸</div>
+    <h2>Drop your food photo here</h2>
+    <p>Supports JPG, PNG, WEBP • Works best with clear food photos</p>
+    <button class="btn" onclick="document.getElementById('fileInput').click()">
+      Choose Photo
+    </button>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <!-- Preview -->
+  <div class="preview" id="preview">
+    <img id="previewImg" src="" alt="Food preview">
+    <div class="preview-actions">
+      <button class="btn" onclick="analyzeFood()">🔍 Analyze Nutrition</button>
+      <button class="btn" style="background:#1e293b;" onclick="resetApp()">✕ Change Photo</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Analyzing your food with AI...</p>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+
+    <!-- Food Name -->
+    <div class="food-name-card">
+      <div>
+        <div class="food-name" id="foodName">—</div>
+        <div style="margin-top:6px;">
+          <span class="confidence-badge">Confidence: <span id="confVal">—</span></span>
+        </div>
+      </div>
+      <div class="score-badge" id="scoreBadge">Score —</div>
+    </div>
+
+    <!-- Macros -->
+    <div class="macros-grid">
+      <div class="macro-card cal">
+        <div class="macro-value" id="cal">—</div>
+        <div class="macro-label">Calories</div>
+      </div>
+      <div class="macro-card pro">
+        <div class="macro-value" id="pro">—</div>
+        <div class="macro-label">Protein g</div>
+      </div>
+      <div class="macro-card car">
+        <div class="macro-value" id="car">—</div>
+        <div class="macro-label">Carbs g</div>
+      </div>
+      <div class="macro-card fat">
+        <div class="macro-value" id="fat">—</div>
+        <div class="macro-label">Fat g</div>
+      </div>
+    </div>
+
+    <!-- Portion Slider -->
+    <div class="portion-section">
+      <div class="portion-label">Portion Size: <span id="portionLabel">100g</span></div>
+      <input type="range" id="portionSlider" min="50" max="500" value="100" step="25"
+        oninput="updatePortion(this.value)">
+    </div>
+
+    <!-- Feedback -->
+    <div class="feedback-section">
+      <div class="section-title">Health Insights</div>
+      <div id="feedbackList"></div>
+    </div>
+
+    <!-- Alternatives -->
+    <div class="alt-section">
+      <div class="section-title">Other Possibilities</div>
+      <div id="altList"></div>
+    </div>
+
+    <div class="reset-btn">
+      <button class="btn" onclick="resetApp()">📸 Analyze Another Food</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let currentFile = null;
+let currentNutrition = {};
+
+const fileInput = document.getElementById('fileInput');
+const uploadZone = document.getElementById('uploadZone');
+
+fileInput.addEventListener('change', function(e) {
+  currentFile = e.target.files[0];
+  if (!currentFile) return;
+  showPreview(currentFile);
+});
+
+uploadZone.addEventListener('dragover', e => {
+  e.preventDefault(); uploadZone.classList.add('drag-over');
+});
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.classList.remove('drag-over');
+});
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('drag-over');
+  currentFile = e.dataTransfer.files[0];
+  if (currentFile) showPreview(currentFile);
+});
+
+function showPreview(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('previewImg').src = ev.target.result;
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('preview').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeFood() {
+  if (!currentFile) return;
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('results').style.display = 'none';
+
+  const formData = new FormData();
+  formData.append('file', currentFile);
+
+  try {
+    const res = await fetch('/analyze', { method: 'POST', body: formData });
+    const data = await res.json();
+    displayResults(data);
+  } catch(err) {
+    alert('Something went wrong. Please try again.');
+    resetApp();
+  }
+}
+
+function displayResults(data) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+
+  const top = data.predictions[0];
+  const n = data.nutrition;
+  currentNutrition = n;
+
+  document.getElementById('foodName').textContent =
+    top.food.replace(/_/g, ' ');
+  document.getElementById('confVal').textContent = top.confidence;
+
+  const score = n.health_score || 5;
+  const badge = document.getElementById('scoreBadge');
+  badge.textContent = 'Health ' + score + '/10';
+  badge.className = 'score-badge ' +
+    (score >= 7 ? 'score-high' : score >= 4 ? 'score-mid' : 'score-low');
+
+  document.getElementById('cal').textContent = n.calories_per_100g || '—';
+  document.getElementById('pro').textContent = n.protein || '—';
+  document.getElementById('car').textContent = n.carbs || '—';
+  document.getElementById('fat').textContent = n.fat || '—';
+
+  document.getElementById('portionSlider').value = 100;
+  document.getElementById('portionLabel').textContent = '100g';
+
+  const feedbackHtml = (data.feedback || [])
+    .map(f => '<div class="feedback-item">' + f + '</div>')
+    .join('');
+  document.getElementById('feedbackList').innerHTML =
+    feedbackHtml || '<div class="feedback-item">No specific insights available.</div>';
+
+  const altHtml = data.predictions.slice(1)
+    .map(p => '<div class="alt-item"><span class="alt-food">' +
+      p.food.replace(/_/g,' ') +
+      '</span><span class="alt-conf">' + p.confidence + '</span></div>')
+    .join('');
+  document.getElementById('altList').innerHTML = altHtml;
+}
+
+function updatePortion(val) {
+  document.getElementById('portionLabel').textContent = val + 'g';
+  const f = val / 100;
+  const n = currentNutrition;
+  document.getElementById('cal').textContent =
+    Math.round((n.calories_per_100g || 0) * f);
+  document.getElementById('pro').textContent =
+    Math.round((n.protein || 0) * f * 10) / 10;
+  document.getElementById('car').textContent =
+    Math.round((n.carbs || 0) * f * 10) / 10;
+  document.getElementById('fat').textContent =
+    Math.round((n.fat || 0) * f * 10) / 10;
+}
+
+function resetApp() {
+  currentFile = null;
+  currentNutrition = {};
+  document.getElementById('fileInput').value = '';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('portionSlider').value = 100;
+}
+</script>
+</body>
+</html>
