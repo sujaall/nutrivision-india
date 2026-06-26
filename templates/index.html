@@ -99,6 +99,28 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0f1e;color:#e2e8f0;min-heig
 .loading-box{text-align:center;padding:30px;}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#166534;color:#86efac;padding:10px 24px;border-radius:99px;font-size:0.85rem;font-weight:600;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
+.scan-tab {
+  flex:1; background:#0f172a; border:1px solid #1e293b;
+  border-radius:10px; padding:10px; color:#64748b;
+  font-size:0.85rem; font-weight:600; cursor:pointer;
+  transition:all 0.2s;
+}
+.scan-tab.active {
+  border-color:#f97316; color:#f97316; background:#1a1200;
+}
+.search-item {
+  padding:12px; border-radius:10px; background:#0f172a;
+  border:1px solid #1e293b; margin-bottom:8px; cursor:pointer;
+  transition:all 0.2s;
+}
+.search-item:hover { border-color:#f97316; }
+.search-item-name {
+  font-size:0.9rem; font-weight:600; text-transform:capitalize;
+  color:#cbd5e1;
+}
+.search-item-cal {
+  font-size:0.75rem; color:#64748b; margin-top:3px;
+}
 </style>
 </head>
 <body>
@@ -184,6 +206,62 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0f1e;color:#e2e8f0;min-heig
     <p>Click to upload or drag and drop</p>
     <p style="margin-top:8px;font-size:0.75rem;color:#334155;">JPG · PNG · WEBP</p>
   </div>
+  <!-- MANUAL SEARCH TAB -->
+<div style="display:flex;gap:8px;margin-bottom:16px;">
+  <button class="scan-tab active" onclick="switchScanTab(this,'photo')" id="tab-photo">
+    📸 Scan Photo
+  </button>
+  <button class="scan-tab" onclick="switchScanTab(this,'search')" id="tab-search">
+    🔍 Search Food
+  </button>
+</div>
+
+<!-- SEARCH PANEL -->
+<div id="search-panel" style="display:none;">
+  <div class="card">
+    <div style="position:relative;">
+      <input class="form-input" id="food-search-input"
+        type="text" placeholder="Search... biryani, dal, poha"
+        oninput="searchFood(this.value)">
+    </div>
+    <div id="search-results" style="margin-top:12px;"></div>
+  </div>
+
+  <!-- Manual entry result -->
+  <div class="card" id="manual-entry-card" style="display:none;">
+    <div class="result-food" id="manual-food-name">—</div>
+    <div class="macro-mini-grid">
+      <div class="macro-mini m-cal"><div class="macro-mini-val" id="mr-cal">—</div><div class="macro-mini-lbl">Calories</div></div>
+      <div class="macro-mini m-pro"><div class="macro-mini-val" id="mr-pro">—</div><div class="macro-mini-lbl">Protein g</div></div>
+      <div class="macro-mini m-car"><div class="macro-mini-val" id="mr-car">—</div><div class="macro-mini-lbl">Carbs g</div></div>
+      <div class="macro-mini m-fat"><div class="macro-mini-val" id="mr-fat">—</div><div class="macro-mini-lbl">Fat g</div></div>
+    </div>
+    <div class="portion-row">
+      <label>Amount:</label>
+      <input type="range" id="manualSlider" min="50" max="500"
+        value="100" step="25" oninput="updateManualPortion(this.value)">
+      <span class="portion-val" id="manualLabel">100g</span>
+    </div>
+
+    <!-- Custom gram input -->
+    <div style="margin:10px 0;display:flex;gap:10px;align-items:center;">
+      <span style="color:#94a3b8;font-size:0.82rem;">Or type exact grams:</span>
+      <input type="number" id="customGrams"
+        style="width:90px;background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:8px;color:#e2e8f0;font-size:0.9rem;"
+        placeholder="150" oninput="updateManualPortion(this.value)">
+      <span style="color:#64748b;font-size:0.85rem;">g</span>
+    </div>
+
+    <div class="card-title" style="margin-top:8px;">Meal Type</div>
+    <div class="meal-type-row">
+      <div class="meal-type-btn active" onclick="selectMeal(this,'breakfast')">🌅 Breakfast</div>
+      <div class="meal-type-btn" onclick="selectMeal(this,'lunch')">☀️ Lunch</div>
+      <div class="meal-type-btn" onclick="selectMeal(this,'dinner')">🌙 Dinner</div>
+      <div class="meal-type-btn" onclick="selectMeal(this,'snack')">🍎 Snack</div>
+    </div>
+    <button class="btn" onclick="logManualMeal()">✅ Add to Diary</button>
+  </div>
+</div>
   <input type="file" id="fileInput" accept="image/*" capture="environment">
   <div id="scan-loading" style="display:none;" class="card">
     <div class="loading-box"><div class="spinner"></div><p style="color:#94a3b8;">Analyzing your food...</p></div>
@@ -577,6 +655,107 @@ function showToast(msg,error){
   t.style.color=error?'#fca5a5':'#86efac';
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
+}
+let manualNutrition = {};
+let manualFoodName = '';
+
+function switchScanTab(el, tab) {
+  document.querySelectorAll('.scan-tab')
+    .forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (tab === 'photo') {
+    document.getElementById('scan-upload').style.display = 'block';
+    document.getElementById('search-panel').style.display = 'none';
+    document.getElementById('scan-result').style.display = 'none';
+  } else {
+    document.getElementById('scan-upload').style.display = 'none';
+    document.getElementById('search-panel').style.display = 'block';
+    document.getElementById('scan-result').style.display = 'none';
+    document.getElementById('scan-loading').style.display = 'none';
+  }
+}
+
+async function searchFood(query) {
+  const container = document.getElementById('search-results');
+  if (query.length < 2) { container.innerHTML = ''; return; }
+  try {
+    const res = await fetch('/api/search_food?q=' + encodeURIComponent(query));
+    const data = await res.json();
+    if (data.results.length === 0) {
+      container.innerHTML = '<p style="color:#475569;font-size:0.85rem;padding:8px;">No results found. Try another name.</p>';
+      return;
+    }
+    container.innerHTML = data.results.map(item =>
+      '<div class="search-item" onclick="selectSearchFood(' +
+      JSON.stringify(item).replace(/"/g, '&quot;') + ')">' +
+      '<div class="search-item-name">' + item.name.replace(/_/g,' ') + '</div>' +
+      '<div class="search-item-cal">' + item.calories_per_100g +
+      ' cal · P:' + item.protein + 'g C:' + item.carbs +
+      'g F:' + item.fat + 'g per 100g</div></div>'
+    ).join('');
+  } catch(e) {
+    container.innerHTML = '<p style="color:#475569;font-size:0.85rem;">Search unavailable.</p>';
+  }
+}
+
+function selectSearchFood(item) {
+  manualFoodName = item.name;
+  manualNutrition = item;
+  document.getElementById('manual-food-name').textContent =
+    item.name.replace(/_/g,' ');
+  document.getElementById('manualSlider').value = 100;
+  document.getElementById('manualLabel').textContent = '100g';
+  document.getElementById('customGrams').value = '';
+  updateManualPortion(100);
+  document.getElementById('manual-entry-card').style.display = 'block';
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('food-search-input').value = '';
+  document.getElementById('manual-entry-card')
+    .scrollIntoView({behavior:'smooth'});
+}
+
+function updateManualPortion(val) {
+  const v = parseInt(val) || 100;
+  document.getElementById('manualLabel').textContent = v + 'g';
+  document.getElementById('manualSlider').value = Math.min(500, Math.max(50, v));
+  const f = v / 100;
+  const n = manualNutrition;
+  document.getElementById('mr-cal').textContent =
+    Math.round((n.calories_per_100g||0)*f);
+  document.getElementById('mr-pro').textContent =
+    Math.round((n.protein||0)*f*10)/10;
+  document.getElementById('mr-car').textContent =
+    Math.round((n.carbs||0)*f*10)/10;
+  document.getElementById('mr-fat').textContent =
+    Math.round((n.fat||0)*f*10)/10;
+}
+
+async function logManualMeal() {
+  const grams = parseInt(document.getElementById('customGrams').value) ||
+    parseInt(document.getElementById('manualSlider').value);
+  const f = grams / 100;
+  const n = manualNutrition;
+  const entry = {
+    user_id: USER_ID, food: manualFoodName, portion: grams,
+    calories: Math.round((n.calories_per_100g||0)*f),
+    protein: Math.round((n.protein||0)*f*10)/10,
+    carbs: Math.round((n.carbs||0)*f*10)/10,
+    fat: Math.round((n.fat||0)*f*10)/10,
+    meal_type: currentMealType
+  };
+  try {
+    const res = await fetch('/api/log_meal', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(entry)
+    });
+    const data = await res.json();
+    if(data.success) updateProgress(data.today_totals);
+  } catch(e){}
+  showToast('Added to diary! ✅');
+  document.getElementById('manual-entry-card').style.display = 'none';
+  document.getElementById('food-search-input').value = '';
+  setTimeout(()=>showScreen('diary'), 800);
 }
 </script>
 </body>

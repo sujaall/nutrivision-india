@@ -167,6 +167,21 @@ def get_diary(user_id):
         'totals': totals,
         'date': today
     })
+@app.route('/api/search_food')
+def search_food():
+    query = request.args.get('q','').lower().strip()
+    results = []
+    for food_key, nutrition in nutrition_db.items():
+        if query in food_key.lower().replace('_',' '):
+            results.append({
+                'name': food_key,
+                'calories_per_100g': nutrition.get('calories_per_100g',0),
+                'protein': nutrition.get('protein',0),
+                'carbs': nutrition.get('carbs',0),
+                'fat': nutrition.get('fat',0),
+                'health_score': nutrition.get('health_score',5)
+            })
+    return jsonify({'results': results[:10]})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
